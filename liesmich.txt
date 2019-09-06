@@ -1,0 +1,326 @@
+Mailchimp 4.2 für Zen Cart 1.5.6 deutsch
+
+Sinn und Zweck
+Dieses Modul integriert das Mailchimp Newslettersystem in Ihren Zen Cart Shop.
+Das Abonnieren des Newsletters erfolgt über eine Sidebox.
+Auch im Zuge der normalen Registrierung im Shop wird der Kunde automatisch (nach Bestätigung des Double Opt-In Emails) in Ihren Mailchimp Newsletter eingetragen, falls er die Checkbox Newsletter abonnieren ankreuzt.
+
+Übersetzung/Anpassung des Moduls von thatsoftwareguy für die deutsche Zen Cart Version 1.5.6
+
+Voraussetzung:
+Registrierung bei Mailchimp
+www.mailchimp.com
+
+
+Vorbereitung vor der Installation:
+
+
+1.
+Melden Sie sich für Mailchimp unter http://www.mailchimp.com an
+
+2.
+Erstellen Sie eine Liste für Ihren Newsletter bzw. verwenden sie die Liste, die bei der Registrierung bereits angelegt wurde
+Hauptmenüpunkt Audience in Ihrer Mailchimp Administration
+In Ihrem Anmeldeformular sollten Sie nur die E-Mail-Adresse erfassen, nicht den Namen oder noch andere Felder.
+Dieses Modul unterstützt nur die Email-Adresse, falls Sie weitere Felder möchten, müssen Sie dieses Modul selbst entsprechend anpassen
+
+3. 
+Clicken Sie in Ihrer Liste auf "Signup Forms" und dort auf "Embedded Forms"
+Wählen Sie "Unstyled"
+Sie bekommen einen HTML Code angezeigt, der z.B. so aussieht:
+
+<!-- Begin Mailchimp Signup Form -->
+<div id="mc_embed_signup">
+<form action="https://xxx.us18.list-manage.com/subscribe/post?u=1234567&amp;id=1234567" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate>
+    <div id="mc_embed_signup_scroll">
+	<h2>Subscribe</h2>
+<div class="indicates-required"><span class="asterisk">*</span> indicates required</div>
+<div class="mc-field-group">
+	<label for="mce-EMAIL">Email Address  <span class="asterisk">*</span>
+</label>
+	<input type="email" value="" name="EMAIL" class="required email" id="mce-EMAIL">
+</div>
+	<div id="mce-responses" class="clear">
+		<div class="response" id="mce-error-response" style="display:none"></div>
+		<div class="response" id="mce-success-response" style="display:none"></div>
+	</div>    <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+    <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_22a078bbad8a90c170677f515_07e78fb3a4" tabindex="-1" value=""></div>
+    <div class="clear"><input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="button"></div>
+    </div>
+</form>
+</div>
+
+<!--End mc_embed_signup-->
+
+Sehen Sie sich den HTML-Code an.
+Wichtig ist die URL  hinter form action
+https://xxx.us18.list-manage.com/subscribe/post?u=1234567&amp;id=1234567
+
+Das liefert Ihnen bereits 3 benötigte Werte, die Sie später in eine Sprachdatei dieses Moduls eintragen müssen
+
+URL:
+https://xxx.us18.list-manage.com/subscribe/post
+
+U:
+1234567
+
+ID:
+1234567
+
+Unter dem Kommentar <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+finden Sie folgende Zeile:
+<div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="abcdefg" tabindex="-1" value=""></div>
+
+Kopieren Sie sich diese Zeile, Sie müssen Sie später in einer Templatedatei dieses Moduls einfügen
+
+
+4. 
+Rechts oben in Ihrer Mailchimp-Administration befindet sich unter Ihrem Usernamen ein Dropdown-Menü
+Wählen Sie "Account".
+Dort wählen Sie unter "Extras" "Api-Key"
+Erstellen Sie einen API Key und notieren Sie sich diesen API Key
+
+
+5.
+Nehmen Sie sich die Zeit, MailChimp vorher zu testen und anzupassen.
+Aktivieren Sie unbedingt in Ihrer Liste unter "Setting" "List Name and Defaults" "Enable Double Opt-In"
+Double Opt-In ist ZWINGEND um DSGVO-konform zu sein. Kein Newsletter ohne Double Opt-In!
+Passen Sie die Texte an Ihre Wünsche an
+
+Erst jetzt integrieren Sie das Modul in Ihren Shop
+
+1.
+Im Ordner NEUE DATEIEN alle Ordner namens DEINTEMPLATE auf das im Shop aktive Template umbenennen
+
+2.
+Öffnen Sie includes/languages/german/extra_definitions/mailchimp_sidebox_definitions.php mit einem Texteditor und ändern Sie die folgenden 4 Werte auf ihre eigenen ab, die Sie in Schritt 3 und 4 der Vorbereitung ermittelt haben:
+define('BOX_MAILCHIMP_NEWSLETTER_ID','123456789');  
+define('BOX_MAILCHIMP_NEWSLETTER_U','abc123abc123abc123abc123');  
+define('BOX_MAILCHIMP_NEWSLETTER_URL','https://xxxxxxx.us18.list-manage.com/subscribe/post');  
+define('BOX_MAILCHIMP_NEWSLETTER_API_KEY','a1b2c3d4e5f6g7h8'); 
+
+Falls Sie im Shop auch die englische Sprache nutzen, machen Sie dasselbe in  includes/languages/english/extra_definitions/mailchimp_sidebox_definitions.php
+
+3.
+Öffnen Sie includes/templates/DEINTEMPLATE/sideboxes/tpl_mailchimp_sidebox.php mit einem Texteditor und kopieren Sie unter
+// Tragen Sie hier vor dem <br/> den Spam Bot Schutzcode ein so wie in der liesmich.txt beschrieben 
+  $content .= '<br />';
+den Code hinein, den Sie in Schritt 3 der Vorbereitung ermittelt haben
+Das ganze sieht danach also so aus:
+// Tragen Sie hier vor dem <br/> den Spam Bot Schutzcode ein so wie in der liesmich.txt beschrieben 
+$content .= '<div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="abcdefg" tabindex="-1" value=""></div><br />';
+
+4.
+Im Ordner GEAENDERTE DATEIEN vergleichen Sie nun die includes/modules/DEINTEMPATE/create_account.php mit der in Ihrem Shop
+Die einzige Änderung ist folgender neuer Eintrag:
+// bof Mailchimp
+    if ((int)$newsletter == 1) { 
+       mailchimp_add($email_address);
+   }
+   // eof Mailchimp
+unterhalb von
+// hook notifier class
+    $zco_notifier->notify('NOTIFY_LOGIN_SUCCESS_VIA_CREATE_ACCOUNT', $email_address, $extra_welcome_text, $send_welcome_email);
+
+Nehmen Sie die Änderung in der Datei Ihres Shops vor   
+
+5.
+Im Ordner GEAENDERTE DATEIEN vergleichen Sie nun die includes/modules/pages/account_newsletters/header.php mit der in Ihrem Shop
+Es gibt zwei kommentierte Änderungen in dieser Datei
+Nehmen Sie die Änderungen in der Datei Ihres Shops vor
+
+6.
+Nun laden Sie die Dateien aus dem Ordner NEUE DATEIEN in der vorgegebenen Struktur ins Shopverzeichnis hoch
+
+7.
+Unter Tools > Boylayout aktivieren Sie die neue Sidebox
+
+8.
+Stellen Sie sicher, dass Sie unter Konfiguration > Kundendetails Checkbox für Newsletter anzeigen auf 1 gestellt haben
+Seit Version 4.2 erfolgt eine Rückkoppelung mit Mailchimp wenn der Kunde in seinem Kundenaccount unter Mein Konto den Newsletter abbestellt.
+Seine Email wird dann automatisch bei Mailchimp entfernt.
+Dennoch ist es einfacher, die ganze Abmeldemöglichkeit im Shop zu deaktivieren und unter Konfiguration > Email Optionen > Link Newsletter abbestellen auf false zu stellen.
+Jeder Mailchimp Newsletter enthält einen Abmeldelink, über den sich der Kunde vom Newsletter abmelden kann
+
+Fertig
+Sie haben die gesamte Zen Cart Newsletterfunktionalität an Mailchimp ausgelagert
+
+
+Original englische readme (leicht veraltet)
+
+MailChimp Integration for Zen Cart 1.3.x
+(Formerly called MailChimp Sidebox)
+Version 4.2
+
+Note: This uses MailChimp API 3.0. All prior versions have been deprecated after
+12/31/16.    
+If you also use Newsletter Discount, you MUST update that too. 
+
+Author: Scott Wilson
+http://www.thatsoftwareguy.com 
+Zen Forum PM swguy
+
+Released under the GNU General Purpose License 
+See license.txt for details.
+
+Donations welcome at http://donate.thatsoftwareguy.com/
+
+Even more information on this contribution is provided in
+http://www.thatsoftwareguy.com/zencart_mailchimp.html
+
+No warranties expressed or implied; use at your own risk.
+
+History: 
+4.2  11/15/2018 - Fixed API integration issues; added newsletter page
+4.1  10/01/2017 - Updated installation instructions & signup form
+4.0a 11/06/2016 - Fixed forum reported bug
+4.0  10/23/2016 - Updated to Mailchimp API 3.0.
+3.0a 11/20/2013 - Small bug in sidebox fixed.  Thanks to lunabug on the Zen Cart Forum.
+3.0  05/01/2012 - Uses MailChimp API 1.3   
+2.2a 07/16/2011 - Fixed validation issues.
+2.2 03/12/2011 - Updated instructions to reflect latest MailChimp policies.
+2.1 10/02/2010 - Updated instructions to reflect latest MailChimp policies.
+2.0 08/01/2010 - Added mailchimp subscribe at signup. MailChimp API 1.2.
+1.2 08/25/2008 - updated install instructions and form for MailChimp API 1.1. 
+1.1 08/05/2007 - Put files in template directories for easier upgrade
+1.0 06/22/2007 - First Release 
+--------------------------------------------------
+Overview: 
+Provides a subscription mechanism you can put in a sidebox if you
+are using MailChimp for your newsletters, as well as a modification to
+account creation so subscriptions will work there too.
+
+MailChimp is a great newsletter management service that has a per-
+message pricing model.  This makes it much more affordable than
+Constant Contact for small businesses with low email volumes.
+(Constant Contact charges a monthly fee irrespective of how much 
+mail you send.)
+
+To sign up for their service, go to www.mailchimp.com
+--------------------------------------------------
+
+Pre-Installation Preparation: 
+
+0. Read the MailChimp Email Marketing Guide at 
+http://www.mailchimp.com/resources/email_marketing_guide.phtml
+
+1. Sign up for mailchimp at http://www.mailchimp.com
+
+2. Create a list for your newsletter (press the Lists tab
+at the top of the page, then "Create New List").  
+In your Sign-up form, I suggest only having email address 
+(if you want more fields, you'll have to modify this contribution).
+
+3. Press the "Forms" link for your new list.
+Scroll down to the link that says "Signup Form" and click it.
+This will take you to a screen which will show you your signup form.
+
+Look at the HTML code.  
+At the top of the form will be something that looks like this: 
+<form action="http://list-manage.com/subscribe/post" method="POST">
+
+Note the URL. 
+
+At the bottom of the form will be something like this: 
+
+<td align="left"><INPUT TYPE='submit' NAME='submit' VALUE='Subscribe'>
+<input type="hidden" name="id" value="5331068383">
+<input type="hidden" name="u" value="0dcb1c9808"></td>
+
+Note the the values of "u" and "id" - you will be 
+embedding them in the language file during the installation process.
+
+Find the line that starts with "real people should not fill this in and expect good things".  Underneath this, between a start and end <div> tag is 
+the bot prevention code.  Note this.
+
+4. At the top of the Mailchimp page is a dropdown called "Account."
+Select "api keys & info" and add an api key to your account.  
+Note the value; you will be embedding
+it in the language file during the installation process.
+
+5. Take the time to test and customize MailChimp before 
+adding it to your site.
+
+
+--------------------------------------------------
+
+Installation Instructions: 
+0. Back up everything!  Try this in a test environment prior to installing
+it on a live shop.
+
+1. Copy the contents of the folder you have unzipped to 
+the root directory of your shop.  
+
+2. Edit the file
+includes/languages/english/extra_definitions/mailchimp_sidebox_defines.php
+set the BOX_MAILCHIMP_NEWSLETTER_ID to the "id" value you noted 
+in step 3 of the pre-installation instructions.
+set the BOX_MAILCHIMP_NEWSLETTER_U to the "u" value you noted 
+in step 3 of the pre-installation instructions.
+Set BOX_MAILCHIMP_NEWSLETTER_URL to the URL value you noted in 
+step 3 of the pre-installation instructions.
+For US based sites, this will be http://us1.list-manage.com/subscribe/post 
+Set BOX_MAILCHIMP_APIKEY to the value you noted in step 4 of the 
+pre-installation instructions.
+
+3. Edit the file includes/templates/template_default/sideboxes/tpl_mailchimp_sidebox.php.  Add in the bot prevention part of the form under the line that says
+Put the bot signup prevention code here.
+
+4. In Admin->Tools->Layout Boxes Controller, turn on the MailChimp
+   sidebox.
+
+5. Changes to your Zen Cart configuration: 
+   a) In Configuration->Customer Details, set Show Newsletter Checkbox to 1.
+   b) In Configuration->Email Options, set Display "Newsletter Unsubscribe"
+      Link to false.  
+      (To subscribe, people use the MailChimp sidebox; to unsubscribe, they
+      use the link at the bottom of the newsletter.)
+
+6. If you do not yet have an 
+       includes/modules/YOUR_TEMPLATE/create_account.php, 
+
+   copy from includes/modules/create_account.php to 
+       includes/modules/YOUR_TEMPLATE/create_account.php
+
+   Look for the line: 
+   $zco_notifier->notify('NOTIFY_LOGIN_SUCCESS_VIA_CREATE_ACCOUNT');
+
+   right below it, add the code: 
+    
+   if ((int)$newsletter == 1) { 
+       mailchimp_add($email_address);
+   }
+
+7. In includes/modules/pages/account_newsletters/header_php.php 
+   change 
+$newsletter_query = "SELECT customers_newsletter
+
+to 
+
+$newsletter_query = "SELECT customers_newsletter, customers_email_address
+
+Then right above 
+
+$sql = "UPDATE " . TABLE_CUSTOMERS . "
+
+add 
+
+    // Not the same? Then update MailChimp 
+    $email_address = $newsletter->fields['customers_email_address']; 
+    if ($newsletter_general == '0') {
+       mailchimp_del($email_address);
+    } else {
+       mailchimp_add($email_address);
+    }
+
+
+--------------------------------------------------
+
+New Files
+=========
+includes/languages/english/extra_definitions/mailchimp_sidebox_defines.php
+includes/modules/sideboxes/mailchimp_sidebox.php
+includes/templates/template_default/sideboxes/tpl_mailchimp_sidebox.php
+includes/functions/extra_functions/mailchimp_functions.php
+includes/functions/extra_functions/mailchimp.php
+
